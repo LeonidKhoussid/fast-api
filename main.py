@@ -12,10 +12,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ✅ Load CSV once at startup
+try:
+    df = pd.read_csv("transformed_data.csv")
+    df = df.fillna("")
+    data = df.to_dict(orient="records")
+except Exception as e:
+    data = []
+    print(f"Error loading CSV: {e}")
+
+@app.get("/")
+def root():
+    return {"status": "OK"}
+
 @app.get("/posts")
-def read_csv():
-    try:
-        df = pd.read_csv("transformed_data.csv")
-        return df.fillna("").to_dict(orient="records")
-    except Exception as e:
-        return {"error": str(e)}
+def get_posts():
+    return data
